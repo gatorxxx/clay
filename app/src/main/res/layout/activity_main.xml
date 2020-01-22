@@ -7,6 +7,16 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_main"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+
+    </androidx.appcompat.widget.Toolbar>
+
     <LinearLayout
         android:id="@+id/layout_bible"
         android:layout_width="match_parent"
@@ -15,21 +25,25 @@
         android:background="#e0e0e0"
         android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/function_bible"
+        <Button
+            android:id="@+id/button_bible"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="center"
             android:gravity="center"
+            android:background="@android:color/transparent"
+            android:stateListAnimator="@null"
             android:text="Bible"/>
 
-        <TextView
-            android:id="@+id/function_new_note"
+        <Button
+            android:id="@+id/button_new_note"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_gravity="center"
+            android:background="@android:color/transparent"
+            android:stateListAnimator="@null"
             android:gravity="center"
             android:text="New Note"/>
 
@@ -76,17 +90,9 @@
     </LinearLayout>
 
     <ScrollView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="5">
-
-        <TextView
-            android:id="@+id/tv_content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-
-            />
-
 
     </ScrollView>
 

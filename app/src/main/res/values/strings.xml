@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Clay</string>
+    <string name="title_activity_bible">BibleActivity</string>
+    <string name="hint_bible_input">Enter a Book + Chapter (e.g. gen 1)</string>
+    <string name="hint_note_title_input">Title</string>
+    <string name="hint_note_content_input">Automatically insert verses, hit space after a verse
+        reference (e.g. gen 1:1 or gen 1:1-11)</string>
 </resources>
