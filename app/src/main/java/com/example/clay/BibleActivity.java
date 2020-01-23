@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
@@ -42,7 +43,7 @@ public class BibleActivity extends AppCompatActivity {
                 boolean handled = false;
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                     String[] inputArray = Utils.getInputArray(mEditText.getText().toString());
-                    if (!Utils.isValidInputBible(inputArray)) {
+                    if (!Utils.isValidInputChapter(inputArray)) {
                         Toast.makeText(getApplicationContext(),
                                 "Please enter a valid book + chapter", Toast.LENGTH_SHORT )
                                 .show();
@@ -65,7 +66,10 @@ public class BibleActivity extends AppCompatActivity {
                                 chapterNumber = Integer.parseInt(inputArray[2]);
                             }
 
-                            mRealm = Realm.getDefaultInstance();
+                            RealmConfiguration realmConfig = new RealmConfiguration.Builder()
+                                    .name("bible.realm")
+                                    .build();
+                            mRealm = Realm.getInstance(realmConfig);
                             RealmQuery<Verse> query = mRealm.where(Verse.class);
                             RealmResults<Verse> results = query.equalTo("book", bookNumber)
                                     .equalTo("chapter", chapterNumber).findAll();
@@ -73,6 +77,7 @@ public class BibleActivity extends AppCompatActivity {
                             for (int i = 0; i < results.size(); i++) {
                                 verseList.add(results.get(i));
                             }
+
                             RecyclerViewConfig config = new RecyclerViewConfig();
                             config.setConfig(mRecyclerView, BibleActivity.this, verseList);
                             String displayedTitle = book.getBookName() + " " + chapterNumber;

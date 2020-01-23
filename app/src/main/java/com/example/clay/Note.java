@@ -4,13 +4,13 @@ import io.realm.RealmObject;
 
 public class Note extends RealmObject {
     private String noteTitle;
-    private CharSequence noteContent;
+    private String noteContent;
 
     public Note() {
 
     }
 
-    public Note(String noteTitle, CharSequence noteContent) {
+    public Note(String noteTitle, String noteContent) {
         this.noteTitle = noteTitle;
         this.noteContent = noteContent;
     }
@@ -23,11 +23,11 @@ public class Note extends RealmObject {
         this.noteTitle = noteTitle;
     }
 
-    public CharSequence getNoteContent() {
+    public String getNoteContent() {
         return noteContent;
     }
 
-    public void setNoteContent(CharSequence noteContent) {
+    public void setNoteContent(String noteContent) {
         this.noteContent = noteContent;
     }
 }

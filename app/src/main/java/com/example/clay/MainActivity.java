@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,10 +53,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Realm.init(this);
-        RealmConfiguration realmConfig = new RealmConfiguration.Builder().build();
+        RealmConfiguration realmConfig = new RealmConfiguration.Builder()
+                .name("bible.realm")
+                .build();
         mRealm = Realm.getInstance(realmConfig);
 
         if (mRealm.isEmpty()) {
+            // Create a table for Bible for the first time
+            // TODO: progress bar while creating
             Log.v("Realm Check", "Creating");
             mRealm.executeTransactionAsync(new Realm.Transaction() {
                 @Override

@@ -139,11 +139,7 @@ public class Utils {
         return input.trim().toLowerCase().split(" ");
     }
 
-    public static boolean isValidInputBible(String[] inputArray) {
-        // inputArray.length <= 3
-        // inputArray[0]: String
-        // inputArray[1]: parseInt
-
+    public static boolean isValidInputChapter(String[] inputArray) {
         if (inputArray == null) {
             return false;
         }
@@ -154,5 +150,82 @@ public class Utils {
             return false;
         }
         return true;
+    }
+
+    public static boolean isValidInputVerse(String[] inputArray) {
+        if (inputArray == null) {
+            return false;
+        }
+        if (!(inputArray.length == 2 || inputArray.length == 3)) {
+            return false;
+        }
+        if (inputArray[0] == null || inputArray[1] == null) {
+            return false;
+        }
+        if (inputArray.length == 2) {
+            String[] chapterAndVerse = inputArray[1].split(":");
+            if (chapterAndVerse.length != 2) {
+                return false;
+            } else {
+                if (!isNumeric(chapterAndVerse[0])) {
+                    return false;
+                }
+                String[] verses = chapterAndVerse[1].split("-");
+                if (verses.length != 2) {
+                    return isNumeric(chapterAndVerse[1]);
+                } else {
+                    return isNumeric(verses[0]) && isNumeric(verses[1]);
+                }
+            }
+        } else {
+            String[] chapterAndVerse = inputArray[2].split(":");
+            if (chapterAndVerse.length != 2) {
+                return false;
+            } else {
+                if (!isNumeric(chapterAndVerse[0])) {
+                    return false;
+                }
+                String[] verses = chapterAndVerse[1].split("-");
+                if (verses.length != 2) {
+                    return isNumeric(chapterAndVerse[1]);
+                } else {
+                    return isNumeric(verses[0]) && isNumeric(verses[1]);
+                }
+            }
+        }
+    }
+
+    public static boolean isNumeric(String str) {
+        return str.matches("-?\\d+(\\.\\d+)?");  //match a number with optional '-' and decimal.
+    }
+
+    public static String[] getSearchKeyWords(String[] inputArray) {
+        // length can be 3 or 4
+        // {"Luke", "3", "2"} for Luke 3:2
+        // {"Luke", "3", "2", "4"} for Luke 3:2-4
+        String[] keyWords;
+        String bookName;
+        String[] chapterAndVerse;
+        if (inputArray.length == 2) {
+            bookName = inputArray[0];
+            chapterAndVerse = inputArray[1].split(":");
+        } else {  // For book names starting with number, e.g. 1 Peter
+            bookName = inputArray[0] + " " + inputArray[1];
+            chapterAndVerse = inputArray[2].split(":");
+        }
+        String[] verses = chapterAndVerse[1].split("-");
+        if (verses.length != 2) {  // single verse insertion
+            keyWords = new String[3];
+            keyWords[0] = bookName;  // book name
+            keyWords[1] = chapterAndVerse[0];  // chapter number
+            keyWords[2] = chapterAndVerse[1];  // verse number
+        } else {
+            keyWords = new String[4];
+            keyWords[0] = bookName;  // book name
+            keyWords[1] = chapterAndVerse[0];  // chapter number
+            keyWords[2] = verses[0];  // starting verse
+            keyWords[3] = verses[1];  // ending verse
+        }
+        return keyWords;
     }
 }

@@ -71,6 +71,7 @@
             android:textSize="16sp"
             android:background="@drawable/edit_text_background"
             android:layout_margin="5dp"
+            android:imeOptions="actionDone"
             android:lines="1" />
 
         <TextView
@@ -85,14 +86,14 @@
             android:id="@+id/edit_text_note_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textMultiLine"
             android:hint="@string/hint_note_content_input"
             android:textSize="16sp"
             android:background="@drawable/edit_text_background"
             android:layout_margin="5dp"
-            android:padding="10dp"
+            android:padding="15dp"
             android:lines="24"
             android:maxLines="2000"
+            android:lineSpacingExtra="5dp"
             android:gravity="start"/>
 
     </LinearLayout>
