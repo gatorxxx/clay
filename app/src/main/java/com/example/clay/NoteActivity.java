@@ -30,7 +30,7 @@ public class NoteActivity extends AppCompatActivity {
 
     private Toolbar mToolbarNote;
 
-    private Button mSaveNote;
+    private Button mButtonSaveNote;
     private TextView mDate;
     private EditText mNoteTile;
     private EditText mNoteContent;
@@ -50,26 +50,8 @@ public class NoteActivity extends AppCompatActivity {
         mToolbarNote = findViewById(R.id.toolbar_note);
         setSupportActionBar(mToolbarNote);
 
-        // TODO: save notes in Realm
-
-//        RealmQuery<Note> query = mRealm.where(Note.class);
-//        RealmResults<Note> results = query.findAll();
-//        if (!results.isEmpty()) {
-//            mNote = results.first();
-//            if (mNote != null) {
-//                String preTitle = mNote.getNoteTitle();
-//                String preContent = mNote.getNoteContent();
-//                if (preTitle != null && preContent != null) {
-//                    mNoteTile.setText(preTitle);
-//                    mNoteContent.setText(preContent);
-//                }
-//            }
-//        } else {
-//            mNote = new Note("", "");
-//        }
-
-        mSaveNote = findViewById(R.id.button_note_save);
-        mSaveNote.setOnClickListener(new View.OnClickListener() {
+        mButtonSaveNote = findViewById(R.id.button_note_save);
+        mButtonSaveNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mRealm.executeTransactionAsync(new Realm.Transaction() {
@@ -92,6 +74,8 @@ public class NoteActivity extends AppCompatActivity {
             }
         });
 
+        mNote = new Note();
+
         mDate = findViewById(R.id.text_view_date);
         String currentDate = new SimpleDateFormat("EEE, MMM dd, yyyy", Locale.getDefault()).format(new Date());
         mDate.setText(currentDate);
@@ -103,7 +87,7 @@ public class NoteActivity extends AppCompatActivity {
                 boolean handled = false;
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     String title = mNoteTile.getText().toString();
-                    mNote.setNoteTitle(title);
+                    mNote.setTitle(title);
                     Log.v("Note", "Title added");
                     handled = true;
                 }
@@ -116,7 +100,7 @@ public class NoteActivity extends AppCompatActivity {
         mNoteContent.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+                // TODO: use TextWatcher to listen for deletion
             }
 
             @Override
@@ -141,8 +125,15 @@ public class NoteActivity extends AppCompatActivity {
                     }
                     String[] inputArray = Utils.getInputArray(potentialInsertQuery);
                     if (Utils.isValidInputVerse(inputArray)) {
+                        // Insert verses
                         String versesToInsert = searchVerses(Utils.getSearchKeyWords(inputArray));
                         editable.append("\n" + versesToInsert + "\n\n");
+                        // Add the range of inserted verses
+                        int insertionStart = end + 1;
+                        int insertionEnd = editable.toString().trim().length();
+                        mNote.updateRangesOfVerses(insertionStart);
+                        mNote.updateRangesOfVerses(insertionEnd);
+                        Log.v("Note", "Ranges: " + mNote.getRangesOfVerses());
                     }
                 }
             }
@@ -153,21 +144,36 @@ public class NoteActivity extends AppCompatActivity {
                 boolean handled = false;
                 if ((keyEvent.getAction() == KeyEvent.ACTION_DOWN) && (actionId == KeyEvent.KEYCODE_ENTER)) {
                     String content = mNoteContent.getText().toString();
-                    mNote.setNoteContent(content);
+                    mNote.setContent(content.getBytes());
                     Log.v("Note", "Content added: " + content);
                     handled = true;
                 }
                 if (actionId == EditorInfo.IME_MASK_ACTION) {
                     String content = mNoteContent.getText().toString();
-                    mNote.setNoteContent(content);
+                    mNote.setContent(content.getBytes());
                     Log.v("Note", "Content added: " + content);
                     handled = true;
+                }
+                if (keyEvent.getAction() == KeyEvent.KEYCODE_DEL || actionId == KeyEvent.KEYCODE_DEL) {
+                    String currentContent = textView.getText().toString();
+                    String rangeString = mNote.getRangesOfVerses();
+                    String[] rangeArrayString = rangeString.trim().split(" ");
+                    int[] rangeArray = new int[rangeArrayString.length];
+                    for (int i = 0; i < rangeArrayString.length; i++) {
+                        rangeArray[i] = Integer.parseInt(rangeArrayString[i]);
+                    }
+
+                    int selectionStart = textView.getSelectionStart();
+                    int selectionEnd = textView.getSelectionEnd();
+                    Log.v("Note", "Cursor position: " + selectionStart + " " + selectionEnd);
+                    if (cursorInVerses(selectionStart, rangeArray) || cursorInVerses(selectionEnd, rangeArray)) {
+                        // Disable deletion
+                        textView.setText(currentContent);
+                    }
                 }
                 return handled;
             }
         });
-        // TODO: check current line to insert verses
-//        mContent = mNoteContent.getText().toString().split("\n");
     }
 
     private String searchVerses(String[] inputArray) {
@@ -208,5 +214,31 @@ public class NoteActivity extends AppCompatActivity {
         }
 
         return new String(stringBuilder);
+    }
+
+    private boolean cursorInVerses(int position, int[] rangeArray) {
+        int low = 0;
+        int high = rangeArray.length - 1;
+
+        while (low < high - 1) {
+            int mid = low + (high - low) / 2;
+            if (rangeArray[mid] <= position) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+
+        int target;
+        if (rangeArray[low] < position) {
+            target = high;
+        } else {
+            target = low;
+        }
+        if (target % 2 == 0) {  // insertionStart
+            return false;
+        } else {  // insertionEnd
+            return true;
+        }
     }
 }

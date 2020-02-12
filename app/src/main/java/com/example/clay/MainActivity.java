@@ -4,24 +4,29 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
     private Toolbar mToolbarMain;
 
-    private Realm mRealm;
+    private Realm mRealmBible;
+    private Realm mRealmNotes;
 
     private Button mBibleButton;
     private Button mNewNoteButton;
@@ -53,16 +58,20 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Realm.init(this);
-        RealmConfiguration realmConfig = new RealmConfiguration.Builder()
+        RealmConfiguration realmBibleConfig = new RealmConfiguration.Builder()
                 .name("bible.realm")
                 .build();
-        mRealm = Realm.getInstance(realmConfig);
+        mRealmBible = Realm.getInstance(realmBibleConfig);
+        RealmConfiguration realmNotesConfig = new RealmConfiguration.Builder()
+                .name("notes.realm")
+                .build();
+        mRealmNotes = Realm.getInstance(realmNotesConfig);
 
-        if (mRealm.isEmpty()) {
+        if (mRealmBible.isEmpty()) {
             // Create a table for Bible for the first time
             // TODO: progress bar while creating
-            Log.v("Realm Check", "Creating");
-            mRealm.executeTransactionAsync(new Realm.Transaction() {
+            Log.v("Realm Check", "Creating Bible Database");
+            mRealmBible.executeTransactionAsync(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
                     InputStream inputStream = getResources().openRawResource(R.raw.t_kjv);
@@ -97,18 +106,47 @@ public class MainActivity extends AppCompatActivity {
             }, new Realm.Transaction.OnSuccess() {
                 @Override
                 public void onSuccess() {
-                    Log.v("TAGGED", "SAVED");
+                    Log.v("Realm Check", "Bible Database Created");
                 }
             }, new Realm.Transaction.OnError() {
                 @Override
                 public void onError(Throwable error) {
-                    Log.v("TAGGED", "FAILED");
+                    Log.v("Realm Check", "Failed to Create Bible Database");
                 }
             });
         } else {
-            Log.v("Realm Check", "Existed");
+            Log.v("Realm Check", "Bible Database Existed");
         }
 
         Utils.createSearchList();
+
+        if (mRealmNotes.isEmpty()) {
+            Log.v("Realm Check", "Creating Note Database");
+            mRealmNotes.executeTransactionAsync(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    String noteTitle = "Welcome to Clay!";
+                    String noteContent = "May this app be a blessing to you!\n" +
+                            "You'll find some welcome notes with some helpful tips included in the app. Feel free to take a look now (tap \"Done\" in the top left and open the next note), or jump right in with your first note!";
+                    byte[] contentBytes = noteContent.getBytes();
+                    Note note = new Note(noteTitle, contentBytes);
+                    realm.insert(note);
+                }
+            }, new Realm.Transaction.OnSuccess() {
+                @Override
+                public void onSuccess() {
+                    Log.v("Realm Check", "Note Database Created");
+                }
+            }, new Realm.Transaction.OnError() {
+                @Override
+                public void onError(Throwable error) {
+                    Log.v("Realm Check", "Failed to Create Note Database");
+                }
+            });
+        } else {
+            // TODO: display latest 20 notes
+            Log.v("Realm Check", "Note Database Existed");
+            RealmQuery<Note> query = mRealmNotes.where(Note.class);
+        }
     }
 }
